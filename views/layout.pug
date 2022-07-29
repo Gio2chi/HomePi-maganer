@@ -1,0 +1,40 @@
+doctype html
+html(lang="en")
+  head
+    link(rel='stylesheet', href='/stylesheets/navbar.css')
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(rel="icon" type="image/x-icon" href="/images/logo.png")
+    block head
+      title Home Assistant
+  body 
+    a#bars
+      img(src="/images/bars-solid.svg" width="35" height="35")
+    .navbar#navbar 
+      .inner-fix
+        .navbar-nav
+          a(href=`/users/bots`).block 
+            img.bots(src="/images/robot-solid.svg" width="35" height="35")
+            span bots 
+          a(href=`/users/websites`).block 
+            img.websites(src="/images/cloud-solid.svg" width="35" height="35")
+            span websites
+          a(href=`/users/torrent`).block 
+            img.torrent(src="/images/uTorrent_Logo.svg" width="35" height="35")
+            span torrent dl
+          a(href=`/users/minecraft`).block 
+            img.minecraft(src="/images/mc-icon.svg" width="35" height="35")
+            span minecraft
+          a(href=`/users/miband`).block 
+            img.miband(src="/images/clock-solid.svg" width="35" height="35")
+            span mi band
+          
+        a(href=`/users/`).block.last 
+          img.gear(src="/images/gear-solid.svg" width="35" height="35")
+          span settings
+    block content
+  block scripts
+    script(src="/javascripts/navbar.js")
+    script(src="/javascripts/jquery.min.js")
+    //-script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js")

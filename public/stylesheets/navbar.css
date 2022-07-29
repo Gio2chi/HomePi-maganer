@@ -1,0 +1,193 @@
+*{
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-sizing: border-box;
+}
+a {
+  color: white;
+  text-decoration: none;
+}
+
+body {
+  font: 14px "Roboto Mono", monospace;
+}
+
+#navbar {
+  z-index: 9998;
+  position: fixed;
+  width: 70px;
+  height: 100vh;
+  background-color: rgb(0, 0, 0);
+  color: white;
+  transition: width .3s;
+  overflow: hidden;
+}
+.inner-fix {
+  position: relative;
+  margin: 50px 0 50px 0;
+  height: calc(100% - 100px);
+}
+.navbar-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.block {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 50px;
+  padding-left: 35px;
+}
+.block.last {
+  position: absolute;
+  bottom: 0;
+}
+.block img{
+  transform: translateX(-50%);
+}
+
+.gear, 
+.websites, 
+.bots,
+.minecraft,
+.miband {
+  filter: invert();
+}
+.torrent {
+  filter: grayscale(100%) brightness(200%);
+}
+
+a.block img {
+  filter: invert(55%) sepia(33%) saturate(24%) hue-rotate(11deg) brightness(97%) contrast(96%); 
+}
+#bars {
+  display: none;
+}
+
+a.block:hover .gear {
+  transform: translateX(-50%) rotate(180deg);
+  transition: .4s;
+}
+a.block:hover .websites {
+  filter: invert(45%) sepia(94%) saturate(2015%) hue-rotate(162deg) brightness(95%) contrast(101%);
+} 
+a.block:hover .bots {
+  filter: invert(18%) sepia(31%) saturate(4747%) hue-rotate(201deg) brightness(93%) contrast(106%);
+}
+a.block:hover .minecraft {
+  filter: invert(56%) sepia(11%) saturate(3245%) hue-rotate(69deg) brightness(94%) contrast(79%)
+}
+a.block:hover .miband {
+  filter: invert(68%) sepia(70%) saturate(978%) hue-rotate(18deg) brightness(106%) contrast(97%);
+}
+a.block:hover .torrent {
+  filter: none;
+}
+
+.navbar-nav a.block:hover {
+  background-color: rgba(168, 176, 223, 0.377);
+}
+.navbar-nav .block {
+  border-bottom: 1px solid rgba(168, 176, 223, 0.377);
+}
+.navbar-nav .block:last-child {
+  border: unset;
+}
+
+#navbar:hover {
+  width: 160px;
+}
+#navbar .block span {
+  display: none;
+  white-space: nowrap;
+}
+#navbar .block span::first-letter{
+  text-transform: capitalize;
+}
+#navbar:hover .block span {
+  display: block;
+  padding-right: 5px;
+}
+
+@media (max-width : 770px) {
+  #navbar {
+    display: none;
+  }
+  #navbar.active {
+    display: flex;
+  }
+  
+  #bars.active img{
+    filter: invert(100%);
+  }
+  #bars {
+    z-index: 9999;
+    position: absolute;
+    display: block;
+    top: 10px;
+    right: 10px;
+    transition: .5s;
+  }
+
+  a.block:hover .gear {
+    transform: rotate(180deg);
+    transition: .4s;
+  }
+  a.block .websites {
+    filter: invert(45%) sepia(94%) saturate(2015%) hue-rotate(162deg) brightness(95%) contrast(101%);
+  } 
+  a.block .bots {
+    filter: invert(18%) sepia(31%) saturate(4747%) hue-rotate(201deg) brightness(93%) contrast(106%);
+  }
+  a.block .minecraft {
+    filter: invert(56%) sepia(11%) saturate(3245%) hue-rotate(69deg) brightness(94%) contrast(79%)
+  }
+  a.block .miband {
+    filter: invert(68%) sepia(70%) saturate(978%) hue-rotate(18deg) brightness(106%) contrast(97%);
+  }
+  a.block .torrent {
+    filter: none;
+  }
+
+  #navbar {
+    width: 100%;
+  }
+  .navbar-nav {
+    justify-content: center;
+  }
+  .block{
+    padding: unset;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    grid-template-columns: max-content 25% ;
+  }
+  .block.last {
+    position: relative;
+    bottom: unset
+  }
+  #navbar:hover {
+    width: 100%;
+  }
+  #navbar .block span {
+    display: unset;
+  }
+  .navbar-nav .block {
+    border-bottom: unset;
+  }
+  .block img{
+    transform: unset;
+  }
+  .block span {
+    padding-left: 10px;
+  }
+  .inner-fix {
+    padding-bottom: 50px;
+    width: 100%;
+    margin: auto 0 auto 0;
+    height: fit-content;
+  }
+}

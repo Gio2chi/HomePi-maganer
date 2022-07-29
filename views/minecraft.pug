@@ -1,0 +1,25 @@
+extends layout.pug
+
+block append head
+  link(rel='stylesheet', href='/stylesheets/minecraft.css')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+block append scripts
+  script(src="/javascripts/minecraft.js")
+block content
+  .main 
+    .title Minecraft Servers
+    form#start 
+      select(name="server").select
+        each server in servers
+          option(value=`${server}`)= server
+      input(type="submit" value="Start server")
+    .console
+      .header Console
+      #console
+      form#cmd(autocomplete="off")
+        img(src="/images/angle-right-solid.svg" width="20px" height="20px")
+        input(type="text", name="command" autocomplete="off" required)#cmd-command
+        input(type="submit" style="height: 0px; width: 0px; border: none; padding: 0px;" hidefocus="true")
+    form#stop 
+      input(type="submit" value="Stop")

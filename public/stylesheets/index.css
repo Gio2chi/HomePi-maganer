@@ -1,0 +1,9 @@
+body {
+    min-height: calc(100vh - 50px);
+}
+
+h1.title {
+    text-align: center;
+    font-size: 60px;
+    color: white;
+}

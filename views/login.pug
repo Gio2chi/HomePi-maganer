@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    link(rel='stylesheet', href='/stylesheets/login-register.css')
+    title Login
+  body.login
+    .form-container
+      h1.login Login
+      form.login(action="/login", method="post")
+        .txt-field
+          input.login(type="text", name="username" /*placeholder="MarioRossi68"*/ required) 
+          span
+          label.login Username
+        .txt-field
+          input.login(type="password", name="password" /*pattern="(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"*/ title="Eight or more characters" /*placeholder="***********************"*/ required)
+          span
+          label.login Password
+        input.submit(type="submit" value="Login")

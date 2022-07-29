@@ -1,0 +1,61 @@
+extends layout.pug
+
+block append head
+  link(rel='stylesheet', href='/stylesheets/torrent.css')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+block append scripts
+  script(src="/javascripts/torrent.js")
+block content
+  //- main tipo chrome con 2 finestre espandibili per ricerca
+  .main 
+    #tab-bar
+      button(data-target="management").tab-btn.active
+        img(src="/images/bars-progress-solid.svg" width="35" height="35")
+        span download
+      button(data-target="download").tab-btn#template
+        img(src="/images/magnifying-glass-solid.svg" width="35" height="35")
+        span search
+      button.tab-btn 
+        img(src="/images/plus-solid.svg" width="35" height="35")
+    #management.tab
+      a#cover
+        form(autocomplete="off")#upload-form
+          h1 Download from Magnet
+          .txt-field
+            input#url-input(type="text", name="URL" required)
+            span
+            label URL
+          input(type="button" onclick="download" value="Select Folder")#select-folder-button
+          input(type='hidden' value="/")#selected-folder
+          input(type="submit" hidefocus="true" value="Download")
+        #select-folder
+          .navbar
+            button.back
+              img(src="/images/up-solid.svg" width="35" height="35")
+            span /
+          .submit-form 
+            button.cancel cancel
+            button.submit open
+          #folders
+      #torrent-navbar 
+        a.item#upload
+          img(src="/images/download-solid.svg" width="35" height="35").download-img
+        .spacer
+        a.item
+          img(src="/images/trash-solid.svg" width="35" height="35").trash-img
+        .spacer
+        a.item
+          img(src="/images/play-solid.svg" width="35" height="35").play-img
+        a.item
+          img(src="/images/pause-solid.svg" width="35" height="35").pause-img
+        //-.spacer
+        //-a.item //- start all | stop all
+          img(src="/images/download-solid.svg" width="35" height="35")
+        //-a.item
+          img(src="/images/download-solid.svg" width="35" height="35")
+        a.item.last
+          img(src="/images/gear-solid.svg" width="35" height="35")
+      
+    #download.tab ciao da download
+      .search-bar

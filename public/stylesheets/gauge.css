@@ -1,0 +1,72 @@
+.gauge-container {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.outer {
+    height: 100%;
+    width: 100%;
+    padding: 12.5%;
+    border-radius: 50%;
+    box-shadow: 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
+                -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
+}   
+.inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    box-shadow: inset 4px 4px 6px -1px rgba(0, 0, 0, 0.2),
+                inset -4px -4px 6px -1px rgba(255, 255, 255, 0.7),
+                -0.5px -0.5px 0px rgba(255, 255, 255, 1),
+                0.5px 0.5px 0px rgba(0, 0, 0, 0.15),
+                0px 12px 10px -10px rgba(0, 0, 0, 0.05);
+}
+.number {
+    font-weight: 600;
+    font-size: 15px;
+    color: #555;
+}
+
+svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(135deg);
+}
+.gauge-background circle {
+    fill: none;
+    stroke: #e3edf7;
+    stroke-width: 20px;
+    stroke-dasharray: 472;
+    stroke-dashoffset: 142.8;
+}
+.gauge-background {
+    filter: drop-shadow(6px 10px -1px rgba(0, 0, 0, 0.15));
+}
+.gauge-inner {
+    fill: none;
+    stroke: url(#GradientColor);
+    stroke-width: 20px;
+    stroke-dasharray: 472;
+    stroke-dashoffset: calc(472 - 329.2/100*var(--i) );
+    transition: .5s;
+}
+.gauge-container span{
+    position: absolute;
+    bottom: 15px;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+@media (max-width : 770px) {
+    .number {
+        font-size: 20px;
+    }
+}

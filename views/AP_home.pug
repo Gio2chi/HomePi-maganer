@@ -1,0 +1,64 @@
+extends layout.pug
+
+block append head
+  link(rel='stylesheet', href='/stylesheets/style.css')
+  link(rel='stylesheet', href='/stylesheets/gauge.css')
+  link(rel='stylesheet', href='/stylesheets/account.css')
+
+block append scripts
+  script(src="/javascripts/gauge.js")
+  //-script(src="/javascripts/index.js")
+
+block content 
+  .main 
+    .title Server Stats
+    .resources
+      .cpu
+        .gauge-container 
+          #cpu-number.number 1%
+          svg.gauge-background(xmlns='http://www.w3.org/2000/svg' version='1.1' width='160px' height='160px')
+            defs
+              lineargradient#GradientColor
+                stop(offset='0%' stop-color='#e91e63')
+                stop(offset='100%' stop-color='#673ab7')
+            circle(cx='80' cy='80' r='70' stroke-linecap='round')
+          svg.gauge-inner#cpu-gauge-bar(style="--i: 1" xmlns='http://www.w3.org/2000/svg' version='1.1' width='160px' height='160px')
+            defs
+              lineargradient
+                stop(offset='0%' stop-color='#e91e63')
+                stop(offset='100%' stop-color='#673ab7')
+            circle(cx='80' cy='80' r='70' stroke-linecap='round')
+          span CPU
+      .memory
+        .gauge-container 
+          #mem-number.number 1%
+          svg.gauge-background(xmlns='http://www.w3.org/2000/svg' version='1.1' width='160px' height='160px')
+            defs
+              lineargradient#GradientColor
+                stop(offset='0%' stop-color='#e91e63')
+                stop(offset='100%' stop-color='#673ab7')
+            circle(cx='80' cy='80' r='70' stroke-linecap='round')
+          svg.gauge-inner#mem-gauge-bar(style="--i: 1" xmlns='http://www.w3.org/2000/svg' version='1.1' width='160px' height='160px')
+            defs
+              lineargradient
+                stop(offset='0%' stop-color='#e91e63')
+                stop(offset='100%' stop-color='#673ab7')
+            circle(cx='80' cy='80' r='70' stroke-linecap='round')
+          span RAM
+      .internet
+        .gauge-container 
+          #internet-number.number 1%
+          svg.gauge-background(xmlns='http://www.w3.org/2000/svg' version='1.1' width='160px' height='160px')
+            defs
+              lineargradient#GradientColor
+                stop(offset='0%' stop-color='#e91e63')
+                stop(offset='100%' stop-color='#673ab7')
+            circle(cx='80' cy='80' r='70' stroke-linecap='round')
+          svg.gauge-inner#internet-gauge-bar(style="--i: 1" xmlns='http://www.w3.org/2000/svg' version='1.1' width='160px' height='160px')
+            defs
+              lineargradient
+                stop(offset='0%' stop-color='#e91e63')
+                stop(offset='100%' stop-color='#673ab7')
+            circle(cx='80' cy='80' r='70' stroke-linecap='round')
+          span RETE
+      //.disk
