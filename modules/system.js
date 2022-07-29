@@ -33,10 +33,10 @@ let updateSystemInformation = async () => {
     network.readSpeed = networkLoad[0].rx_sec
     network.transferSpeed = networkLoad[0].tx_sec
 
-    /*let diskLoad = await si.fsStats()
+    let diskLoad = await si.fsStats()
     disk.readSpeed = diskLoad.rx_sec
     disk.writeSpeed = diskLoad.wx_sec
-    console.log(cpu, mem, disk, network)*/
+    console.log(cpu, mem, disk, network)
 
     console.timeEnd('\033[36mupdated system info\033[0m')
     return

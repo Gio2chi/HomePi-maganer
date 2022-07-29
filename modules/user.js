@@ -9,7 +9,7 @@ const checkUser = (params) => {
     if (params.username === username && authenticator.check(params.password, secret)) {
         let msg = telegram.appsConstants.application
         msg.from = "AP"
-        msg.value = params.username + "logged in"
+        msg.value = params.username + " logged in"
         telegram.sendMessage(msg)
         return true;
     }
