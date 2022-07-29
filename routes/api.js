@@ -5,6 +5,7 @@ var session = require('express-session');
 const minecraftRouter = require('./minecraftApi')
 const torrentRouter = require('./torrentApi')
 const statsRouter = require('./statsApi')
+const webhooksRouter = require('./webhooksApi')
 
 router.use(session({
     secret: 'AhSDh7gj0a2da23lj',
@@ -15,5 +16,6 @@ router.use(session({
 router.use('/minecraft', minecraftRouter);
 router.use('/torrent', torrentRouter);
 router.use('/stats', statsRouter);
+router.use('/webhooks', webhooksRouter);
 
 module.exports = router;

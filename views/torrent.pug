@@ -18,44 +18,74 @@ block content
         span search
       button.tab-btn 
         img(src="/images/plus-solid.svg" width="35" height="35")
-    #management.tab
-      a#cover
-        form(autocomplete="off")#upload-form
-          h1 Download from Magnet
-          .txt-field
-            input#url-input(type="text", name="URL" required)
-            span
-            label URL
-          input(type="button" onclick="download" value="Select Folder")#select-folder-button
-          input(type='hidden' value="/")#selected-folder
-          input(type="submit" hidefocus="true" value="Download")
-        #select-folder
-          .navbar
-            button.back
-              img(src="/images/up-solid.svg" width="35" height="35")
-            span /
-          .submit-form 
-            button.cancel cancel
-            button.submit open
-          #folders
+    a#cover
+      form(autocomplete="off")#upload-form
+        h1 Download from Magnet
+        .txt-field
+          input#url-input(type="text", name="URL" required)
+          span
+          label URL
+        input(type="button" onclick="download" value="Select Folder")#select-folder-button
+        input(type='hidden' value="/")#selected-folder
+        input(type="submit" hidefocus="true" value="Download")
+      #select-folder
+        .navbar
+          button.back
+            img(src="/images/up-solid.svg" width="35" height="35")
+          span /
+        .submit-form 
+          button.cancel cancel
+          button.submit open
+        #folders
+    #management.tab.active
       #torrent-navbar 
         a.item#upload
           img(src="/images/download-solid.svg" width="35" height="35").download-img
         .spacer
-        a.item
+        a.item#select-all
+          img(src="/images/check-double-solid.svg" width="35" height="35").select-all
+        .spacer
+        a.item#remove
           img(src="/images/trash-solid.svg" width="35" height="35").trash-img
         .spacer
-        a.item
+        a.item#play
           img(src="/images/play-solid.svg" width="35" height="35").play-img
-        a.item
+        a.item#pause
           img(src="/images/pause-solid.svg" width="35" height="35").pause-img
-        //-.spacer
-        //-a.item //- start all | stop all
-          img(src="/images/download-solid.svg" width="35" height="35")
-        //-a.item
-          img(src="/images/download-solid.svg" width="35" height="35")
         a.item.last
           img(src="/images/gear-solid.svg" width="35" height="35")
-      
-    #download.tab ciao da download
-      .search-bar
+      #torrents-container 
+        each torrent in torrents
+          .torrent.draggable(id="torrent_"+torrent.id style="--i: "+(torrent.percentDone*100).toFixed(2)+"%;")
+            .torrent_grab
+              img(src="/images/grip-dots-vertical.svg")
+            .torrent_name= torrent.name
+            case torrent.status 
+              when 0
+                .torrent_peer_details= "PAUSED"
+              when 1
+                .torrent_peer_details= "CHECK_WAIT"
+              when 2
+                .torrent_peer_details= "CHECK"
+              when 3
+                .torrent_peer_details= "DOWNLOAD_WAIT"
+              when 4
+                .torrent_peer_details= "DOWNLOAD"
+              when 5
+                .torrent_peer_details= "SEED_WAIT"
+              when 6
+                .torrent_peer_details= "SEED"
+              when 7
+                .torrent_peer_details= "ISOLATED"
+            
+            .progress-bar
+            .progress-status= (torrent.downloadedEver/1024/1024/1024).toFixed(2) + "/" + (torrent.totalSize/1024/1024/1024).toFixed(2) + "GB (" + (torrent.percentDone*100).toFixed(2) + "%)"
+    #download.tab 
+      .container
+        form.search-bar
+          input.search-btn(type="text", name="search-btn" autocomplete="off" placeholder="Search for torrents")
+          button(type="submit") 
+            span search
+            img(src="/images/magnifying-glass-solid.svg" width="35" height="35")
+        .search-results
+

@@ -56,7 +56,7 @@ body {
 .miband {
   filter: invert();
 }
-.torrent {
+.torrent-nav {
   filter: grayscale(100%) brightness(200%);
 }
 
@@ -83,7 +83,7 @@ a.block:hover .minecraft {
 a.block:hover .miband {
   filter: invert(68%) sepia(70%) saturate(978%) hue-rotate(18deg) brightness(106%) contrast(97%);
 }
-a.block:hover .torrent {
+a.block:hover .torrent-nav {
   filter: none;
 }
 
@@ -148,7 +148,7 @@ a.block:hover .torrent {
   a.block .miband {
     filter: invert(68%) sepia(70%) saturate(978%) hue-rotate(18deg) brightness(106%) contrast(97%);
   }
-  a.block .torrent {
+  a.block .torrent-nav {
     filter: none;
   }
 

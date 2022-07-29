@@ -1,3 +1,5 @@
 uncomment lines in mudules/system in fn updateSystemInformation //section disk
 
 "default_servers_folder": "/usr/mc_servers"
+
+torrent: configuration button 

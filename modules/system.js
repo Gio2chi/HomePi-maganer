@@ -1,7 +1,6 @@
 const si = require('systeminformation')
 const fs = require('fs')
 const path = require('path')
-const telegram = require('./telegramInterface')
 
 //TODO: Add cache to store usage and temperature to create a time graph
 
@@ -109,10 +108,6 @@ let startSession = (s) => {
     setExpiration(s)
 }
 let stopSession = () => {
-    let msg = telegram.appsConstants.application
-    msg.from = "AP"
-    msg.value = "updating session stopped!"
-    telegram.sendMessage(msg)
     running = false
 }
 let isRunning = () => { return running }
