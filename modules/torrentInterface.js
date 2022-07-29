@@ -216,7 +216,7 @@ let setExpirationTorrent = async (s) => {
         await delay(1000)
     }
     clearInterval(interval)
-    stopSession()
+    stopSessionTorrent()
 }
 let updateExpirationTorrent = (s, str) => {
     if (str == "add") sessionExpiredTorrent += s

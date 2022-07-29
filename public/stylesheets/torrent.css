@@ -407,6 +407,9 @@ input[type="button"]:hover {
   overflow-y: scroll;
   overflow-x: hidden;
 }
+.container::-webkit-scrollbar {
+  display: none;
+}
 .search-bar {
   width: 100%;
   display: flex;
@@ -455,6 +458,9 @@ input[type="button"]:hover {
   margin: auto;
   border-left: 1px solid #2e2e2e75;
   border-right: 1px solid #2e2e2e75;
+}
+.search-results::-webkit-scrollbar {
+  display: none;
 }
 .search-results .torrent-header {
   display: grid;
