@@ -19,4 +19,36 @@ router.post('/ifttt', (req, res) => {
     res.send("hi ").status(200)
 })
 
+
+router.post('/google', (req, res) => {
+    //if(req.headers["x-ifttt-secret-token"] != process.env.IFTTT_AUTH_TOKEN) return res.json('error')
+    console.log(req.body)
+    res.send("hi ").status(200)
+})
+router.get('/google', (req, res) => {
+    //if(req.headers["x-ifttt-secret-token"] != process.env.IFTTT_AUTH_TOKEN) return res.json('error')
+    console.log(req.body)
+    res.send("hi ").status(200)
+})
+router.post('/google/token', (req, res) => {
+    //if(req.headers["x-ifttt-secret-token"] != process.env.IFTTT_AUTH_TOKEN) return res.json('error')
+    console.log(req.body)
+    res.send("hi ").status(200)
+})
+router.get('/google/token', (req, res) => {
+    //if(req.headers["x-ifttt-secret-token"] != process.env.IFTTT_AUTH_TOKEN) return res.json('error')
+    console.log(req.body)
+    res.send("hi ").status(200)
+})
+router.post('/google/oauth/oauth', (req, res) => {
+    //if(req.headers["x-ifttt-secret-token"] != process.env.IFTTT_AUTH_TOKEN) return res.json('error')
+    console.log(req.body)
+    res.send("hi ").status(200)
+})
+router.get('/google/oauth/oauth', (req, res) => {
+    //if(req.headers["x-ifttt-secret-token"] != process.env.IFTTT_AUTH_TOKEN) return res.json('error')
+    console.log(req.body)
+    res.send("hi ").status(200)
+})
+
 module.exports = router;
