@@ -1,7 +1,7 @@
-loggingServer.private.pem
+#loggingServer.private.pem
 .env
 node_modules
 backup
-modules/keys/**
-modules/processesInfo/**
+/modules/keys/**
+/modules/processesInfo/**
 .gitignore
