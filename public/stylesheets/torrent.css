@@ -129,7 +129,7 @@ button {
   background-color: white;
   box-shadow: 5px 5px 15px 5px #000000;
   border-radius: 10px;
-  z-index: 11;
+  z-index: 23;
 }
 #upload-form.active {
   display: flex;
@@ -227,7 +227,7 @@ input[type="button"]:hover {
   width: 100%;
   height: calc(100vh - 50px);
   background-color: rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 22;
 }
 #cover.active {
   display: block;
