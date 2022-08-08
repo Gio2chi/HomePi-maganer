@@ -18,10 +18,6 @@ router.get('/', function (req, res, next) {
 
 router.post('/login', function (req, res, next) {
   if (!checkUser(req.body)) return res.redirect('/');
-  let msg = telegram.appsConstants.application
-  msg.from = "AP"
-  msg.value = "user logged in!"
-  telegram.sendMessage(msg)
   req.session.user = req.body.username;
   res.redirect('/users')
 });

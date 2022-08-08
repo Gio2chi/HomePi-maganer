@@ -236,7 +236,7 @@ input[type="button"]:hover {
 #select-folder {
   position: absolute;
   display: none;
-  z-index: 14;
+  z-index: 24;
   top: 50%;
   left: 50%;
   height: 80%;
@@ -292,7 +292,7 @@ input[type="button"]:hover {
   align-self: flex-end;
   right: 20px;
   bottom: 10px;
-  z-index: 15;
+  z-index: 25;
 }
 #select-folder .submit-form .submit {
   width: 80px;
