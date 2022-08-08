@@ -4,4 +4,3 @@ node_modules
 backup
 /modules/keys/**
 /modules/processesInfo/**
-.gitignore
