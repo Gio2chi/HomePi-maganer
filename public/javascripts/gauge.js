@@ -8,7 +8,7 @@ let internet_number = document.getElementById('internet-number');
 let updateStats = setInterval(()=> {
     $.ajax({
         method: "GET",
-        url: "http://localhost:3001/api/stats/server",
+        url: "/api/stats/server",
         dataType: "json",
         success: (data) => {
             if(data.status == 'error' || !data) clearInterval(updateStats)
