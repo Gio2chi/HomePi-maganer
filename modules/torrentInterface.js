@@ -29,7 +29,6 @@ let getMagnet = async (torrent) => {
 }
 
 let download = (magnet, dir) => {
-    console.log("/export/Gio_A_NAS/Plex" + dir)
     if (dir)
         transmission.addUrl(magnet, { "download-dir": "/export/Gio_A_NAS/Plex" + dir }, (err, args) => {
             if(err) {
@@ -109,8 +108,10 @@ let setOrder = (order) => {
     orderList = []
     orderList = order
 }
-let getOrder = () => {
-    return orderList
+let getOrder = async () => {
+    if((await this.getAllTorrentDetails()).length > orderList.length)
+        return orderList
+    else return []
 }
 
 let getStatus = (code) => {
@@ -202,7 +203,6 @@ let asyncInterval = async (asyncFunction, ms) => {
         await asyncFunction()
         await delay(ms)
     }
-    console.log(torrents, "ciao")
     console.log("exiting asyncInterval")
 }
 
