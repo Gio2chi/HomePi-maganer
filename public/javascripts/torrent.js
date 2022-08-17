@@ -99,9 +99,13 @@ document.getElementById('upload-form').onsubmit = () => {
 }
 
 let getfolders = (dest) => {
+    console.log(dest)
     return new Promise((resolve, reject) => {
         $.ajax({
             type: "POST",
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
             url: "/api/torrent/destinations",
             dataType: "json",
             data: { destination: dest },
@@ -241,7 +245,7 @@ $("#select-folder .back")[0].onclick = () => {
     $("#select-folder .navbar span")[0].innerHTML = txt
 
     $("#folders")[0].innerHTML = ""
-    createList()
+    createList($("#select-folder .navbar span")[0].innerHTML)
 }
 $("#folders").on("click", "div", (e) => {
     let div = $(e.currentTarget)
@@ -250,7 +254,7 @@ $("#folders").on("click", "div", (e) => {
     $("#select-folder .navbar span")[0].innerHTML += input.val() + "/"
 
     $("#folders")[0].innerHTML = ""
-    createList()
+    createList($("#select-folder .navbar span")[0].innerHTML)
 })
 $("#select-folder .cancel")[0].onclick = () => {
     $("#select-folder").removeClass("active")

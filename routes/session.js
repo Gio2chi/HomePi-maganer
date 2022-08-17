@@ -4,6 +4,7 @@ var session = require('express-session');
 const stats = require('../modules/system');
 const mc = require('../modules/minecraftInterface');
 const torrent = require('../modules/torrentInterface');
+const web  = require('../modules/websitesInterface');
 
 router.use(session({
   /*genid: function(req) {
@@ -48,6 +49,12 @@ router.get('/torrent', async (req, res, next) => {
   }
   for(let i=0; i<torrents.length; i++) console.log(torrents[i].name)
   res.render('torrent', { torrents: torrents });
+});
+
+router.get('/websites', function (req, res, next) {
+  if (!req.session.user) return res.redirect('/');
+  let websites = web.getWebsites()
+  res.render('websites', { websites: websites });
 });
 
 module.exports = router;

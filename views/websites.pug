@@ -1,0 +1,28 @@
+extends layout.pug
+
+block append head
+  link(rel='stylesheet', href='/stylesheets/websites.css')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+block append scripts
+  script(src="/javascripts/websites.js")
+block content
+  .main 
+    .title Control Panel
+    .websites-container
+      each website in websites
+        .website
+          .navbar 
+            .status
+            .title=website
+            .nav
+              button(data-target=website).restart
+                img(src="/images/arrow-rotate-right-solid.svg" width="35" height="35")
+              button(data-target=website).power
+                img(src="/images/power-off-solid.svg" width="35" height="35")
+          div(id=website).console
+          form.cmd(autocomplete="off")
+            img(src="/images/angle-right-solid.svg" width="20px" height="20px")
+            input(type="text", name="command" autocomplete="off" required).cmd-command
+            input(type="submit" style="height: 0px; width: 0px; border: none; padding: 0px;" hidefocus="true")
+        

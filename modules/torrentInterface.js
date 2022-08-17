@@ -81,6 +81,7 @@ let getTorrentDetails = (ids) => {
 let getMediaFolders = (dest) => {
     let folders
     if (dest) {
+        console.log(dest)
         let pathToFolder = path.join(config.default_media_folder, dest)
         if (fs.existsSync(pathToFolder)) {
             folders = fs.readdirSync(pathToFolder, { withFileTypes: true });
@@ -109,7 +110,7 @@ let setOrder = (order) => {
     orderList = order
 }
 let getOrder = async () => {
-    if((await this.getAllTorrentDetails()).length > orderList.length)
+    if((await getAllTorrentDetails()).length > orderList.length)
         return orderList
     else return []
 }
