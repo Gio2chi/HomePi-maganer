@@ -31,7 +31,7 @@
 
 .website {
   position: relative;
-  min-width: 710px;
+  width: 100%;
   height: 50%;
   margin: 20px;
   float:left;
@@ -148,22 +148,5 @@
 @media (max-width: 770px) {
   .main {
     margin-inline: auto;
-  }
-}
-
-/* space occupied by a console plus 70px of margin */
-@media (min-width: 820px) {
-  .websites-container {
-    grid-template-columns: auto;
-  }
-}
-@media (min-width: 1570px) {
-  .websites-container {
-    grid-template-columns: auto auto;
-  }
-}
-@media (min-width: 2320px) {
-  .websites-container {
-    grid-template-columns: auto auto auto;
   }
 }
