@@ -42,9 +42,9 @@ let getConsoleStream = (websiteName, stream) => {
     process.nextTick(function () {
         websitesArr[websiteName].stream.pipe(stream, { end: false })
 
-        websitesArr[websiteName].stream.once('end', function () {
+        /*websitesArr[websiteName].stream.once('end', function () {
             stream.end()
-        })
+        })*/
     })
 }
 
