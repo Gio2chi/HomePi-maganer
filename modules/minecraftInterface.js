@@ -22,6 +22,8 @@ let startServer = (serverName) => {
 
     let server = getServerFolderAbsPath(serverName)
 
+    if(!fs.existsSync(path.join(__dirname,'../log/minecraft/' + serverName + '/'))) fs.mkdirSync(path.join(__dirname,'../log/minecraft/' + serverName + '/'))
+
     minecraftServerProcess = spawn('java', [
         '-Xmx1024M',
         '-Xms1024M',
@@ -36,14 +38,18 @@ let startServer = (serverName) => {
             if (code != 0 && signal != null) {
                 console.log('process exited with code: ' + code + ' and signal: ' + signal)
             }
-
+            
+            writable.close()
             running = false
         })
 
     function log(data) {
+        fs.appendFileSync(path.join(__dirname,'../log/minecraft/' + serverName + '/' + new Date().toISOString() + '.log'), buffer.toString())
         process.stdout.write(data.toString());
     }
+
     minecraftServerProcess.stdout.on('data', (buffer) => {
+        fs.appendFileSync(path.join(__dirname,'../log/minecraft/' + serverName + '/' + new Date().toISOString() + '.log'), buffer.toString())
         cacheStream.write(buffer)
     });
     minecraftServerProcess.stderr.on('data', log);

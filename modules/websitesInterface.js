@@ -1,6 +1,7 @@
 const fs = require('fs');
 const Path = require('path');
 const StreamCache = require('stream-cache');
+const busboy = require('busboy');
 
 const logFolder = Path.join(__dirname, '../log/websites');
 let websitesArr = [];
@@ -9,9 +10,9 @@ let logToFile = (websiteName, stream) => {
     if (!fs.existsSync(Path.join(logFolder, websiteName))) fs.mkdirSync(Path.join(logFolder, websiteName))
 
     setData(websiteName)
-    setInterval(() => { setData(websiteName) }, 24 * 60 * 60 * 1000)
+    setInterval(() => { setData(websiteName) }, 25 * 60 * 60 * 1000)
 
-    websitesArr[websiteName].stream = stream
+    //websitesArr[websiteName].stream = bus
 
     stream.on('data', (buffer) => {
         let file = websitesArr[websiteName].path
@@ -28,7 +29,7 @@ let logToFile = (websiteName, stream) => {
 
 let setData = (websiteName) => {
     let date = new Date().toISOString().substring(0, 10)
-    let filePath = Path.join(logFolder, websiteName, date + '.log')
+    let filePath = Path.join(logFolder, websiteName, date + '.' +Math.floor(Math.random() * 1000).toString() + '.log')
     fs.writeFileSync(filePath, '')
     websitesArr[websiteName] = { path: filePath, name: websiteName, cache: new StreamCache() }
 }
@@ -42,9 +43,9 @@ let getConsoleStream = (websiteName, stream) => {
     process.nextTick(function () {
         websitesArr[websiteName].stream.pipe(stream, { end: false })
 
-        /*websitesArr[websiteName].stream.once('end', function () {
+        websitesArr[websiteName].stream.once('end', function () {
             stream.end()
-        })*/
+        })
     })
 }
 
