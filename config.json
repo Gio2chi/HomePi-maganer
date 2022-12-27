@@ -1,6 +1,0 @@
-{
-    "java": "/usr/bin/java/jdk-17.0.1+12/bin/java",
-    "default_servers_folder": "/usr/mc_servers",
-    "default_media_folder": "//192.168.0.21/Gio_A_NAS/Plex",
-    "default_media_folder_path": "/export/Gio_A_NAS/Plex"
-}

@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var session = require('express-session');
 
-const torrent = require('../modules/torrentInterface');
+const torrent = require('../../modules/torrentInterface');
 
 router.use(session({
     secret: 'AhSDh7gj0a2da23lj',

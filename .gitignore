@@ -1,8 +1,8 @@
-#loggingServer.private.pem
 .env
 node_modules/
 backup
 keys/
 processesInfo/
 config.json
-log
+package-lock.json
+log/

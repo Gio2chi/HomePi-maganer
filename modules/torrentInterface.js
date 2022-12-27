@@ -16,8 +16,6 @@ const transmission = new TransmissionApi({
     host: '192.168.0.21',
 });
 
-const config = JSON.parse(fs.readFileSync(path.join(__dirname, '../config.json')));
-
 let search = async (torrentName) => {
     let torrents = await TorrentSearchApi.search(torrentName, 'All', 20)
     //for(let i = 0; i != torrents.length; i++) torrents[i].magnet = await TorrentSearchApi.getMagnet(torrents[i])
@@ -82,13 +80,13 @@ let getMediaFolders = (dest) => {
     let folders
     if (dest) {
         console.log(dest)
-        let pathToFolder = path.join(config.default_media_folder, dest)
+        let pathToFolder = path.join(process.env.MEDIA_FOLDER, dest)
         if (fs.existsSync(pathToFolder)) {
             folders = fs.readdirSync(pathToFolder, { withFileTypes: true });
             folders = folders.filter(folder => folder.isDirectory()).map(folder => folder.name)
         }
     } else {
-        folders = fs.readdirSync(path.join(config.default_media_folder), { withFileTypes: true })
+        folders = fs.readdirSync(path.join(process.env.MEDIA_FOLDER), { withFileTypes: true })
         folders = folders.filter(folder => folder.isDirectory()).map(folder => folder.name)
     }
 
@@ -96,7 +94,7 @@ let getMediaFolders = (dest) => {
 }
 
 let getAbsolutePath = (dest) => {
-    return path.join(config.default_media_folder, dest)
+    return path.join(process.env.MEDIA_FOLDER, dest)
 }
 
 let isHackingFolders = (folder) => {

@@ -43,7 +43,6 @@ let updateSystemInformation = async () => {
 }
 
 let usagePerProcess
-
 let updateUsagePerProcess = async () => {
     console.time('\033[36mupdated usage per process\033[0m')
 
@@ -92,7 +91,7 @@ let updateProcessList = async () => {
         }
 
     console.log("apps: " + arr.length)
-    fs.writeFileSync(path.join(__dirname, './processesInfo/processesAllowed.json'), JSON.stringify(arr, null, 2))
+    fs.writeFileSync(path.join(__dirname, '../log/processesAllowed.json'), JSON.stringify(arr, null, 2))
     console.timeEnd('\033[36mupdated process list\033[0m')
     return
 }
@@ -144,7 +143,7 @@ let getExpiration = () => {
 }
 
 let getInfos = () => {
-    return { cpu: cpu, mem: mem, network: network, disk: disk }
+    return { cpu, mem, network, disk }
 }
 
 module.exports = {

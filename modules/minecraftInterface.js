@@ -1,58 +1,69 @@
+require('dotenv').config()
+const {Server, isPortFree} = require('../classes/minecraftServer')
 const kill = require('tree-kill')
 const spawn = require('child_process').spawn;
 const fs = require('fs');
 const path = require('path');
 const telegram = require('./telegramInterface');
-var StreamCache = require('stream-cache');
+// var StreamCache = require('stream-cache');
+// let cacheStream = new StreamCache()
 
-const confJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../config.json')));
+let getServers = () => {
+    let servers = fs.readdirSync(process.env.SERVER_FOLDER, {withFileTypes: true}).filter(dir => dir.isDirectory()).map(dir => {
+        return dir.name
+    })
+    servers = servers.filter(server => {
+        let jars = fs.readdirSync(path.join(process.env.SERVER_FOLDER, server), {withFileTypes: true}).filter(file => file.name.includes('.jar'))
+        return jars.length > 0
+    })
 
-let cacheStream = new StreamCache()
+    return servers
+}
 
-let minecraftServerProcess
-let running
+let servers = []
+getServers().forEach(serverName => {
+    servers[serverName] = ({ name: serverName, path: path.join(process.env.SERVER_FOLDER, serverName), process: undefined, running: false })
+})
 
-let startServer = (serverName) => {
-    if (isRunning()) return;
-    running = true;
+let startServer = (serverName, ram = '1024M') => {
+    const server = servers[serverName]
+    if(server == undefined) return '[ERR]: Unknown server'
+    if (server.running) return '[ERR]: Server online';
+    
+    telegram.sendMessage("<b>[MC Server]</b>: " + serverName + " starting...")
+    server.running = true;
 
-    let msg = telegram.appsConstants.minecraftServer
-    msg.value = "starting server..."
-    telegram.sendMessage(msg)
-
-    let server = getServerFolderAbsPath(serverName)
-
+    // Creating server log folder
     if(!fs.existsSync(path.join(__dirname,'../log/minecraft/' + serverName + '/'))) fs.mkdirSync(path.join(__dirname,'../log/minecraft/' + serverName + '/'))
 
-    minecraftServerProcess = spawn('java', [
-        '-Xmx1024M',
-        '-Xms1024M',
-        '-jar',
-        `server.jar`,
+    // Running the server process
+    server.process = spawn('java', [
+        '-Xmx' + ram, '-Xms' + ram,
+        '-jar', `server.jar`,
         'nogui'
-    ], { cwd: server })
+    ], { cwd: server.path })
         .on('error', (err) => {
             console.log(err)
+            server.running  = false
         })
         .on('exit', (code, signal) => {
             if (code != 0 && signal != null) {
                 console.log('process exited with code: ' + code + ' and signal: ' + signal)
             }
             
-            writable.close()
-            running = false
+            server.running = false
         })
 
     function log(data) {
-        fs.appendFileSync(path.join(__dirname,'../log/minecraft/' + serverName + '/' + new Date().toISOString() + '.log'), buffer.toString())
-        process.stdout.write(data.toString());
+        // fs.appendFileSync(path.join(__dirname,'../log/minecraft/' + serverName + '/' + new Date().toISOString() + '.log'), buffer.toString())
+        console.log(data.toString());
     }
 
-    minecraftServerProcess.stdout.on('data', (buffer) => {
+    server.process.stdout.on('data', (buffer) => {
         fs.appendFileSync(path.join(__dirname,'../log/minecraft/' + serverName + '/' + new Date().toISOString() + '.log'), buffer.toString())
         cacheStream.write(buffer)
     });
-    minecraftServerProcess.stderr.on('data', log);
+    server.process.stderr.on('data', log);
 }
 
 let sendCommand = (command) => {
@@ -83,12 +94,6 @@ let sendCommand = (command) => {
 
 }
 
-let getConsoleStream = (stream) => {
-    if (!isRunning) return "[ERR]: Server is not running"
-
-    cacheStream.pipe(stream);
-}
-
 let stopServer = () => {
     if (!running) return "[ERR]: Server is not running";
     if (minecraftServerProcess.exitCode != null) return "[INFO]: Server is not running, probably exited from within"
@@ -97,30 +102,15 @@ let stopServer = () => {
 
     let msg = telegram.appsConstants.minecraftServer
     msg.value = "server closed"
-    telegram.sendMessage(msg)
+    telegram.sendMessage("<b>[MC Server]</b>: " + serverName + " starting...")
 
     cacheStream._buffers = []
     return "[INFO]: Server closed"
 }
 
-let getServerFolderAbsPath = (serverName) => {
-    return confJson.default_servers_folder + '\\' + serverName
-}
-
-let getServers = () => {
-    return fs.readdirSync(confJson.default_servers_folder)
-}
-
-let getCache = () => {
-    return cache
-}
-
-let isRunning = () => {
-    if (!running || minecraftServerProcess.exitCode != null) {
-        cacheStream._buffers = []
-        return false
-    }
-    return true
+let isRunning = (serverName) => {
+    if(!serverName) return -1
+    return servers[serverName].running
 }
 
 module.exports = {
@@ -128,7 +118,5 @@ module.exports = {
     startServer,
     sendCommand,
     stopServer,
-    getConsoleStream,
-    getCache,
     isRunning
 }

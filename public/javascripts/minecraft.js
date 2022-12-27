@@ -1,114 +1,141 @@
-let startBtn = document.getElementById('start');
-let stopBtn = document.getElementById('stop');
-let consoleOutput = document.getElementById('console');
+let getNodes = str => new DOMParser().parseFromString(str, 'text/html').body.childNodes;
 
-$('#console').click(function() {
-    $('#cmd-command').focus();
-});
+class Server {
+    #server = document.createElement('div')
+    #serverName
+    #interval
+    #index = 0
+    constructor(serverName) {
+        this.#serverName = serverName;
+        let nodes = (getNodes('<div class="title">' + serverName + '</div> <div class="console-container"><div class="header">Console</div><div class="console"></div><form class="cmd" autocomplete="off"><img src="/images/angle-right-solid.svg" width="20px" height="20px"><input type="text" name="command" autocomplete="off" required="" class="cmd-command"><input type="submit" style="height: 0px; width: 0px; border: none; padding: 0px;" hidefocus="true"></form></div><form class="stop"> <input type="submit" value="Stop"></form>'))
+        this.#server.append(...nodes)
+        let children = $(this.#server).children()
 
-let checkRunning = ()=> {
-    $.ajax({
-        type: "GET",
-        url: "/api/minecraft/server-status",
-        success: function (data) {
-            if (data) {
-                if (data.status == "server started" || data.status == "server running") {
-                    startBtn.classList.add("active")
-                    stopBtn.classList.add("active")
-                    consoleOutput.classList.add("active")
-                    consoleOutput.parentElement.classList.add("active")
-                    //consoleOutput.contentWindow.location.reload();
-                    startConsole()
-                } else {
-                    startBtn.classList.remove("active")
-                    stopBtn.classList.remove("active")
-                    consoleOutput.classList.remove("active")
-                    consoleOutput.parentElement.classList.remove("active")
+        for (const child of children) {
+            child.setAttribute("data-server", serverName)
+        }
+        $(".main")[0].appendChild(this.#server)
+        this.#server.id = serverName
+        this.#server.classList.add('server')
+
+        this.#startConsole()
+        $("#" + serverName + ' .console').click(function () {
+            $("#" + serverName + ' .cmd-command').focus();
+        });
+
+        $(this.#server).find(".cmd")[0].addEventListener('submit', (e) => {
+            e.preventDefault()
+            this.#cmd()
+            return false
+        })
+
+        $(this.#server).find(".stop")[0].addEventListener('submit', (e) => {
+            e.preventDefault()
+            this.#stop()
+            return false
+        })
+    }
+
+    #cmd() {
+        $.ajax({
+            type: "POST",
+            url: "/api/minecraft/server-command",
+            data: { command: $("#" + this.#serverName + " input[name=command]").val(), server: this.#serverName },
+        });
+        $("input[name=command]").val("")
+        setTimeout(checkRunning, 2000)
+    }
+    #stop() {
+        let tmp = this.#server
+        let serverName = this.#serverName
+        let interval = this.#interval
+        $.ajax({
+            type: "POST",
+            url: "/api/minecraft/stop-server",
+            dataType: "json",
+            data: { server: this.#serverName },
+            dataType: "json",
+            success: function (data) {
+                if (data) {
+                    if (data.status == "server stopped") {
+                        tmp.remove()
+                        servers[serverName] = undefined
+                        $("#start select").append('<option value="' + serverName + '"> ' + serverName + '</option>')
+                        clearInterval(interval)
+                    };
                 }
             }
-        }
-    });
-    return false;
+        });
+    }
+    #startConsole() {
+        let server = this
+        let serverName = this.#serverName
+        this.#interval = setInterval(() => {
+            $.ajax({
+                type: "POST",
+                url: "/api/minecraft/console",
+                data: { server: serverName, lines: 10, index: this.#index },
+                dataType: "json",
+                success: function (res) {
+                    if (res) {
+                        server.#index = parseInt(res.index);
+                        let data = res.data
+                        for(let i=0; i!=data.length; i++) {
+                            let child = document.createElement('span');
+                            let br = document.createElement('br');
+                            child.innerHTML = data[i]
+                            $('#' + serverName + ' .console')[0].appendChild(child)
+                            $('#' + serverName + ' .console')[0].appendChild(br)
+                            $('#' + serverName + ' .console').scrollTop($('#' + serverName + ' .console')[0].scrollHeight)
+                        }
+                    }
+                }
+            });
+        }, 500)
+        
+        return false;
+    }
 }
 
-checkRunning()
+let servers = []
 
-let startConsole = async () => {
-    startBtn.classList.add("active")
-    stopBtn.classList.add("active")
-    consoleOutput.classList.add("active")
-    let res = await fetch('/api/minecraft/console');
-    let reader = res.body.getReader();
-    let result;
-    let decoder = new TextDecoder('utf8');
-    while (!result?.done) {
-        result = await reader.read();
-        let chunks = decoder.decode(result.value).split("\n");
-
-        for(let i = 0; i < chunks.length; i++) {
-            let chunk = chunks[i]; 
-            if(chunk == "") continue;
-            let child = document.createElement('span');
-            let br = document.createElement('br');
-            child.innerHTML = chunk
-            consoleOutput.appendChild(child)
-            consoleOutput.appendChild(br)
-            $('#console').scrollTop($('#console')[0].scrollHeight);
-        }
-    }
-    return false;
-};
-
-let start = () => {
+document.getElementById("start").onsubmit = (e) => {
+    let serverName = $("#start select").val()
     $.ajax({
         type: "POST",
         url: "/api/minecraft/start-server",
-        data: { server: $("select[name=server]").val() },
+        data: { server: serverName },
         dataType: "json",
         success: function (data) {
             if (data) {
-                if (data.status == "server started" || data.status == "server running") {
-                    startBtn.classList.add("active")
-                    stopBtn.classList.add("active")
-                    consoleOutput.classList.add("active")
-                    consoleOutput.parentElement.classList.add("active")
-                    //consoleOutput.contentWindow.location.reload();
-                    startConsole()
+                if (data.status == "server started") {
+                    servers[serverName] = new Server(serverName)
+                    $('#start option[value="' + serverName + '"]').remove()
                 };
             }
         }
     });
-    return false;
-}
-let stop = () => {
-    $.ajax({
-        type: "GET",
-        url: "/api/minecraft/stop-server",
-        dataType: "json",
-        success: function (data) {
-            if (data) {
-                if (data.status == "server stopped" || data.status == "server running") {
-                    startBtn.classList.remove("active")
-                    stopBtn.classList.remove("active")
-                    consoleOutput.classList.remove("active")
-                    consoleOutput.parentElement.classList.remove("active")
-                };
-            }
-        }
-    });
-    return false;
-}
-let cmd = () => {
-    $.ajax({
-        type: "POST",
-        url: "/api/minecraft/server-command",
-        data: { command: $("input[name=command]").val() },
-    });
-    $("input[name=command]").val("")
-    setTimeout(checkRunning, 2000)
     return false;
 }
 
-document.getElementById("start").onsubmit = start
-document.getElementById("stop").onsubmit = stop
-document.getElementById("cmd").onsubmit = cmd
+let checkRunning = () => {
+    $("#start option").each(function() {
+        let serverName = $(this).val()
+        $.ajax({
+            type: "POST",
+            url: "/api/minecraft/server-status",
+            data: { server: serverName },
+            dataType: "json",
+            success: function (data) {
+                if (data) {
+                    if (data.status == "server started" || data.status == "server running") {
+                        servers[serverName] = new Server(serverName)
+                        $('#start option[value="' + serverName + '"]').remove()
+                    }
+                }
+            }
+        });
+    });
+}
+checkRunning()
+setInterval(checkRunning, 60 * 1000)

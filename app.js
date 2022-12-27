@@ -6,9 +6,6 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
-const {startLogging} = require('./modules/log')
-
-startLogging()
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/session');
