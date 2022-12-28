@@ -1,10 +1,11 @@
+require('dotenv').config()
 var express = require('express');
 var router = express.Router();
 var session = require('express-session');
 const web = require('../../modules/websitesInterface');
 
 router.use(session({
-    secret: 'AhSDh7gj0a2da23lj',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
 }))
