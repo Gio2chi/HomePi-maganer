@@ -3,7 +3,6 @@ var express = require('express');
 var router = express.Router();
 var session = require('express-session');
 const { checkUser } = require('../modules/user')
-const telegram = require('../modules/telegramInterface')
 
 router.use(session({
   secret: process.env.SESSION_SECRET,

@@ -1,54 +1,51 @@
 require('dotenv').config()
-const TorrentSearchApi = require('torrent-search-api');
 const TransmissionApi = require('transmission');
 const fs = require('fs');
 const path = require('path');
-const telegram = require('./telegramInterface');
 
 //if the url of the provider does change, update it in the .dotev file and in the node_modules folder
 // the pirate bay does not provide the best results
 //TorrentSearchApi.enableProvider('ThePirateBay')
-TorrentSearchApi.enableProvider('1337x')
+
+const TorrentSearchApi = require('torrent-search-api');
+const MyCustomProvider = require('./providers/1337x');
+TorrentSearchApi.loadProvider(MyCustomProvider);
+TorrentSearchApi.enableProvider('custom1337x')
 
 const transmission = new TransmissionApi({
-    username: 'Gio2chi',
-    password: "09JKShd23ad",
-    host: '192.168.0.21',
+    username: process.env.TRANSMISSION_USERNAME,
+    password: process.env.TRANSMISSION_PASSWORD,
+    host: process.env.TRANSMISSION_HOST,
 });
 
-let search = async (torrentName) => {
-    let torrents = await TorrentSearchApi.search(torrentName, 'All', 20)
-    //for(let i = 0; i != torrents.length; i++) torrents[i].magnet = await TorrentSearchApi.getMagnet(torrents[i])
-    return torrents
-}
+// Search for torrents
+let search = async (torrentName) => { return await TorrentSearchApi.search(torrentName, 'All', 20) }
 
-let getMagnet = async (torrent) => {
-    return await TorrentSearchApi.getMagnet(torrent)
-}
+// Get magnet link
+let getMagnet = async (torrent) => { return await TorrentSearchApi.getMagnet(torrent) }
 
+// Download torrent from magnet
 let download = (magnet, dir) => {
     if (dir)
+        // Download torrent in directory
         transmission.addUrl(magnet, { "download-dir": "/export/Gio_A_NAS/Plex" + dir }, (err, args) => {
             if(err) {
                 console.log(err)
                 return;
             }
-            let msg = telegram.appsConstants.application
-            msg.from = "AP"
-            msg.value = "Downloading " +args.name
-            telegram.sendMessage(msg)
+            // get torrent name args.name
         })
     else
+        // Download torrent in default directory
         transmission.addUrl(magnet, (err, args) => {
             console.log(err, args);
         })
 }
 
 let torrents 
-let getDetails = () => {
-    return torrents
-}
-
+// Get all torrents details saved in cache
+let getDetails = () => { return torrents }
+// Get all torrents details and save them in cache torrent
 let getAllTorrentDetails = async () => {
     return new Promise((resolve, reject) => {
         transmission.get((err, result) => {
@@ -61,7 +58,7 @@ let getAllTorrentDetails = async () => {
         });
     })
 }
-
+// Get torrents details from ids
 let getTorrentDetails = (ids) => {
     return new Promise((resolve, reject) => {
         transmission.get(ids, (err, result) => {
@@ -76,10 +73,10 @@ let getTorrentDetails = (ids) => {
     })
 }
 
+// Get folders inside one directory
 let getMediaFolders = (dest) => {
     let folders
     if (dest) {
-        console.log(dest)
         let pathToFolder = path.join(process.env.MEDIA_FOLDER, dest)
         if (fs.existsSync(pathToFolder)) {
             folders = fs.readdirSync(pathToFolder, { withFileTypes: true });
@@ -92,27 +89,25 @@ let getMediaFolders = (dest) => {
 
     return folders
 }
-
-let getAbsolutePath = (dest) => {
-    return path.join(process.env.MEDIA_FOLDER, dest)
-}
-
+// Get absolute path to directory in Nas
+let getAbsolutePath = (dest) => { return path.join(process.env.MEDIA_FOLDER, dest) }
+// Safety check for path not allowed
 let isHackingFolders = (folder) => {
     if (folder.includes("../") || folder.includes("..\\") || folder.includes("\\..") || folder.includes("/..")) return true;
     return false;
 }
 
+// Set order of the torrents displayed in the web interface
 var orderList = []
-let setOrder = (order) => {
-    orderList = []
-    orderList = order
-}
+let setOrder = (order) => { orderList = order }
+// Get order of the torrents displayed in the web interface
 let getOrder = async () => {
     if((await getAllTorrentDetails()).length > orderList.length)
         return orderList
     else return []
 }
 
+// Torrent status to string 
 let getStatus = (code) => {
     switch (code) {
         case 0: {
@@ -141,7 +136,7 @@ let getStatus = (code) => {
         }
     }
 }
-
+// Set torrent status in transmission 
 let setTorrentStatus = async (status, id) => {
     switch(status) {
         case "START": {
@@ -182,6 +177,7 @@ let setTorrentStatus = async (status, id) => {
     }
 }
 
+// Start session of retrieving information from transmission 
 let runningTorrent
 let startSessionTorrent = (s) => {
     if (runningTorrent) return
@@ -190,13 +186,16 @@ let startSessionTorrent = (s) => {
 
     setExpirationTorrent(s)
 }
+// Stop session of retrieving information from transmission 
 let stopSessionTorrent = () => {
     runningTorrent = false
 }
+// Get session status of retrieving information from transmission 
 let isRunningTorrent = () => { return runningTorrent }
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
+// loop to retrieve information from transmission every tot ms
 let asyncInterval = async (asyncFunction, ms) => {
     while (runningTorrent) {
         await asyncFunction()
@@ -205,6 +204,7 @@ let asyncInterval = async (asyncFunction, ms) => {
     console.log("exiting asyncInterval")
 }
 
+// Set session expiration in seconds
 let sessionExpiredTorrent
 let setExpirationTorrent = async (s) => {
     sessionExpiredTorrent = s
@@ -217,14 +217,10 @@ let setExpirationTorrent = async (s) => {
     clearInterval(interval)
     stopSessionTorrent()
 }
-let updateExpirationTorrent = (s, str) => {
-    if (str == "add") sessionExpiredTorrent += s
-    sessionExpiredTorrent = s
-}
-
-let getExpirationTorrent = () => {
-    return sessionExpiredTorrent
-}
+// Update session expiration in seconds
+let updateExpirationTorrent = (s, str) => { str == "add" ? sessionExpiredTorrent += s : sessionExpiredTorrent = s }
+// Get session expiration
+let getExpirationTorrent = () => { return sessionExpiredTorrent }
 
 module.exports = {
     startSessionTorrent,

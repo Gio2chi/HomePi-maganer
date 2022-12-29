@@ -34,8 +34,11 @@ let updateSystemInformation = async () => {
     network.transferSpeed = networkLoad[0].tx_sec
 
     let diskLoad = await si.fsStats()
-    disk.readSpeed = diskLoad.rx_sec
-    disk.writeSpeed = diskLoad.wx_sec
+    try {
+        disk.readSpeed = diskLoad.rx_sec
+        disk.writeSpeed = diskLoad.wx_sec
+    } catch (e) {}
+    
     console.log(cpu, mem, disk, network)
 
     console.timeEnd('\033[36mupdated system info\033[0m')
@@ -46,7 +49,7 @@ let usagePerProcess
 let updateUsagePerProcess = async () => {
     console.time('\033[36mupdated usage per process\033[0m')
 
-    let json = JSON.parse(fs.readFileSync(path.join(__dirname, './processesInfo/processesAllowed.json')))
+    let json = JSON.parse(fs.readFileSync(path.join(__dirname, '../log/processesAllowed.json')))
     if (json.lenth == 0) {
         console.log("process allowed json empty")
         console.timeEnd('\033[36mupdated usage per process\033[0m')

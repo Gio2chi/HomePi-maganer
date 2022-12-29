@@ -5,6 +5,8 @@ var session = require('express-session');
 const { Server, isPortFree } = require('../../classes/minecraftServer')
 const fs = require('fs')
 
+const winston = require('winston');
+
 router.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
