@@ -124,12 +124,3 @@ winston.loggers.add('logger', {
         // new winston.transports.Http({ host: process.env.LOG_HOST, port: process.env.LOG_PORT, path: process.env.LOG_PATH})
     ]
 });
-
-
-const logger = winston.loggers.get('logger')
-
-logger.verbose('ciao1')
-
-setTimeout(() => {
-    logger.verbose('ciao2')
-}, 5000)
