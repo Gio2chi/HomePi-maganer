@@ -18,6 +18,6 @@ router.use('/', statsRouter)
 router.use('/stats', statsRouter)
 router.use('/minecraft', minecraftRouter)
 router.use('/torrent', torrentRouter)
-router.use('/websites', websitesRouter)
+// router.use('/websites', websitesRouter) to reconfigure
 
 module.exports = router;

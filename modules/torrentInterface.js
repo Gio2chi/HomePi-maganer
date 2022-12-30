@@ -33,12 +33,17 @@ let download = (magnet, dir) => {
                 console.log(err)
                 return;
             }
+            logger.info('Downloading ' + args.name, { context: '[TOR]: ', filePath: "/export/Gio_A_NAS/Plex" + dir })
             // get torrent name args.name
         })
     else
         // Download torrent in default directory
         transmission.addUrl(magnet, (err, args) => {
-            console.log(err, args);
+            logger.info('Downloading ' + args.name, { context: '[TOR]: ', filePath: "/export/Gio_A_NAS/Plex" })
+            if(err) {
+                console.log(err)
+                return;
+            }
         })
 }
 
@@ -92,7 +97,7 @@ let getMediaFolders = (dest) => {
 // Get absolute path to directory in Nas
 let getAbsolutePath = (dest) => { return path.join(process.env.MEDIA_FOLDER, dest) }
 // Safety check for path not allowed
-let isHackingFolders = (folder) => {
+let isHackingFolder = (folder) => {
     if (folder.includes("../") || folder.includes("..\\") || folder.includes("\\..") || folder.includes("/..")) return true;
     return false;
 }
@@ -236,7 +241,7 @@ module.exports = {
     getTorrentDetails,
     getMediaFolders,
     getAbsolutePath,
-    isHackingFolders,
+    isHackingFolder,
     setOrder,
     getOrder,
     setTorrentStatus,

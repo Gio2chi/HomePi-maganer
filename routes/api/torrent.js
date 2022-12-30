@@ -5,81 +5,150 @@ var session = require('express-session');
 
 const torrent = require('../../modules/torrentInterface');
 
+const winston = require('winston');
+const logger = winston.loggers.get('logger')
+
 router.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
 }))
 
-router.get('/isValidDestination', (req, res) => {
-    if(!req.session.user || !req.body.destination) return res.json({ status: 'error' });
-    
-    res.json({ status: 'success' })
-})
-
 router.post('/destinations', (req, res) => {
-    if(!req.session.user) return res.json({ status: 'error', code: 403 });
-    if(torrent.isHackingFolders(req.body.destination)) return res.json({ status: 'error', code: 403 });
+
+    // Handle clients bad requests
+    if (!req.session.user) {
+        req.metadata = { 'error-message': 'user not logged' }
+        return res.status(401).json({ status: 'error' });
+    } else if (torrent.isHackingFolder(req.body.destination)) {
+        req.metadata = { 'error-message': 'folder not allowed' }
+        return res.status(401).json({ status: 'error' });
+    }
+
+    // get folders in the media directory
     let folders = torrent.getMediaFolders(req.body.destination)
-    if(!folders) return res.json({ status: 'error', code: 404, message: 'no such directory' });
-    res.json({ destinations: folders })
+
+    // Handle clients bad requests
+    if (!folders) {
+        req.metadata = { 'error-message': 'no such directory' }
+        return res.status(401).json({ status: 'error', message: 'no such directory' });
+    }
+
+    req.metadata = { destinations: folders }
+    return res.json({ destinations: folders })
 })
 
-router.post('/upload', (req, res) => {
+router.post('/download', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    if(!req.session.user || !req.body.url) return res.json({ status: 'error' });
-    if(torrent.isHackingFolders(req.body.destination)) return res.json({ status: 'error' });
-    if(req.body.destination != "/" || !req.body.destination)
+
+    // Handle clients bad requests
+    if (!req.session.user) {
+        req.metadata = { 'error-message': 'user not logged' }
+        return res.status(401).json({ status: 'error' });
+    } else if (!req.body.url) {
+        req.metadata = { 'error-message': 'url not provided' }
+        return res.status(401).json({ status: 'error' });
+    } else if (torrent.isHackingFolder(req.body.destination)) {
+        req.metadata = { 'error-message': 'folder not allowed' }
+        return res.status(401).json({ status: 'error' });
+    }
+
+    // Download torrent file from magnet link in a folder
+    if (req.body.destination != "/" || !req.body.destination) {
         torrent.download(req.body.url, req.body.destination)
-    else torrent.download(req.body.url)
-    res.json({ status: 'success' });
+    } else {
+        torrent.download(req.body.url)
+    }
+
+    return res.json({ status: 'success' });
 })
 
 router.get('/info', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    if(!req.session.user) return res.json({ status: 'error' });
+
+    // Handle clients bad requests
+    if (!req.session.user) {
+        req.metadata = { 'error-message': 'user not logged' }
+        return res.status(401).json({ status: 'error' });
+    }
+
+    logger.verbose('Updating torrent session expiration')
     torrent.updateExpirationTorrent(30)
-    res.json({
-        torrents: torrent.getDetails()
-    })
+
+    res.json({ torrents: torrent.getDetails() })
 })
 
 router.post('/setTorrentOrder', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    if(!req.session.user || !req.body.jsonStr) return res.json({ status: 'error' });
+
+    // Handle clients bad requests
+    if (!req.session.user) {
+        req.metadata = { 'error-message': 'user not logged' }
+        return res.status(401).json({ status: 'error' });
+    } else if (!req.body.jsonStr) {
+        req.metadata = { 'error-message': 'order not provided' }
+        return res.status(401).json({ status: 'error' });
+    }
     let arr = (JSON.parse(req.body.jsonStr)).torrentIds
-    if(!arr) return res.json({ status: 'error' });
+    if (!arr) {
+        req.metadata = { 'error-message': 'order not provided' }
+        return res.status(401).json({ status: 'error' });
+    }
+
     try {
-        for(let i=0; i<arr.length; i++) {
-            if(typeof arr[i] != "number") return res.json({ status: 'error' });
+        for (let i = 0; i < arr.length; i++) {
+            if (typeof arr[i] != "number") {
+                req.metadata = { 'error-message': 'wrong order format' }
+                return res.status(401).json({ status: 'error' });
+            }
         }
     } catch (error) {
-        return res.json({ status: 'error' });
+        req.metadata = { error };
+        return res.status(500).json({ status: 'Internal Error' });
     }
-    
+
+    // Set the order of the torrents
     torrent.setOrder(arr)
     res.json({ status: 'success' });
 })
 
 router.post('/setTorrentStatus', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    if(!req.session.user || !req.body.status) return res.json({ status: 'error' });
-    if(!(req.body.status == 'START_ALL' || req.body.status == 'PAUSE_ALL' || req.body.status == 'REMOVE_ALL') && !req.body.ids) return res.json({ status: 'error' });
-    if(req.body.status == 'START_ALL' || req.body.status == 'PAUSE_ALL' || req.body.status == 'REMOVE_ALL') {
+
+    // Handle clients bad requests
+    if (!req.session.user) {
+        req.metadata = { 'error-message': 'user not logged' }
+        return res.status(401).json({ status: 'error' });
+    } else if (!req.body.status) {
+        req.metadata = { 'error-message': 'status not provided' }
+        return res.status(401).json({ status: 'error' });
+    } else if (!(req.body.status == 'START_ALL' || req.body.status == 'PAUSE_ALL' || req.body.status == 'REMOVE_ALL') && !req.body.ids) {
+        req.metadata = { 'error-message': 'ids not provided in  status setter' }
+        return res.status(401).json({ status: 'error' });
+    }
+
+    // Set global status to all torrent
+    if (req.body.status == 'START_ALL' || req.body.status == 'PAUSE_ALL' || req.body.status == 'REMOVE_ALL') {
         torrent.setTorrentStatus(req.body.status)
+        req.metadata = { 'message': req.body.status + ' on all torrents' }
         return res.json({ status: 'success' });
     }
 
     let ids = JSON.parse(req.body.ids);
     try {
-        for(let i=0; i<ids.length; i++) {
-            if(typeof ids[i] != "number") return res.json({ status: 'error' });
+        for (let i = 0; i < ids.length; i++) {
+            if (typeof ids[i] != "number") {
+                req.metadata = { 'error-message': 'wrong ids format' }
+                return res.status(401).json({ status: 'error' });
+            }
         }
     } catch (error) {
-        return res.json({ status: 'error' });
+        req.metadata = { error };
+        return res.status(500).json({ status: 'Internal Error' });
     }
 
-    for(let i=0; i<ids.length; i++) {
+    // Set status on specific torrents
+    for (let i = 0; i < ids.length; i++) {
         torrent.setTorrentStatus(req.body.status, ids[i]);
     }
 
@@ -88,16 +157,38 @@ router.post('/setTorrentStatus', async (req, res) => {
 
 router.post('/search', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    if(!req.session.user || !req.body.search) return res.json({ status: 'error' });
 
-    res.json({torrents: await torrent.search(req.body.search), status: 'success' });
+    // Handle clients bad requests
+    if (!req.session.user) {
+        req.metadata = { 'error-message': 'user not logged' }
+        return res.status(401).json({ status: 'error' });
+    } else if (!req.body.search) {
+        req.metadata = { 'error-message': 'search param not provided' }
+        return res.status(401).json({ status: 'error' });
+    }
+
+    let torrents = await torrent.search(req.body.search)
+    req.metadata = { torrents }
+    res.json({ torrents, status: 'success' });
 })
 
 router.post('/getMagnet', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    if(!req.session.user || !req.body.torrent) return res.json({ status: 'error' });
+
+    // Handle clients bad requests
+    if (!req.session.user) {
+        req.metadata = { 'error-message': 'user not logged' }
+        return res.status(401).json({ status: 'error' });
+    } else if (!req.body.torrent) {
+        req.metadata = { 'error-message': 'torrent magnet param not provided' }
+        return res.status(401).json({ status: 'error' });
+    }
+
+    // Send magnet link
     let torrentObj = JSON.parse(req.body.torrent);
-    res.json({magnet: await torrent.getMagnet(torrentObj), status: 'success' });
+    let magnet = await torrent.getMagnet(torrentObj)
+    req.metadata = { magnet }
+    res.json({ magnet, status: 'success' });
 })
 
 module.exports = router;

@@ -81,7 +81,7 @@ document.getElementById('cover').onclick = (e) => {
 document.getElementById('upload-form').onsubmit = () => {
     $.ajax({
         type: "POST",
-        url: "/api/torrent/upload",
+        url: "/api/torrent/download",
         dataType: "json",
         data: { url: $("#url-input").val(), destination: $("#selected-folder").val() },
         success: function (data) {
@@ -99,7 +99,6 @@ document.getElementById('upload-form').onsubmit = () => {
 }
 
 let getfolders = (dest) => {
-    console.log(dest)
     return new Promise((resolve, reject) => {
         $.ajax({
             type: "POST",
@@ -492,14 +491,12 @@ for (let i = 0; i < list.length; i++) {
 }
 
 let getMagnet = (torrent, element, link) => {
-    console.log(torrent)
     $.ajax({
         url: '/api/torrent/getMagnet',
         method: 'POST',
         dataType: 'json',
         data: { torrent: JSON.stringify(torrent) },
         success: (data) => {
-            console.log(data)
             if (data.status == 'error') return;
             $(element).val(data.magnet)
             link.onclick = () => {

@@ -3,6 +3,9 @@ var express = require('express');
 var router = express.Router();
 var session = require('express-session');
 
+const winston = require('winston');
+const logger = winston.loggers.get('logger')
+
 router.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -12,11 +15,22 @@ router.use(session({
 const torrent = require('../../modules/torrentInterface');
 
 router.get('/', async (req, res, next) => {
-    if (!req.session.user) return res.redirect('/');
-    if (!torrent.isRunningTorrent()) torrent.startSessionTorrent(5 * 60)
+    
+    // Handle clients bad requests
+    if (!req.session.user ) {
+        req.metadata = { 'error-message': 'user not logged, redirecting to / root' }
+        return res.redirect('/');
+    }
+
+    // Check if the torrent session is running , if not then start it
+    if (!torrent.isRunningTorrent()) {
+        logger.verbose('Starting torrent session', { context: '[TOR]: ' })
+        torrent.startSessionTorrent(5 * 60)
+    }
+
     let torrents = await torrent.getAllTorrentDetails()
-    for (let i = 0; i < torrents.length; i++) console.log(torrents[i].name)
-    console.log("-----------")
+
+    // Getting torrents order and setting it in the torrents object
     var orderTmp = []
     let order = torrent.getOrder()
     if (order.length > 0) {
@@ -30,8 +44,9 @@ router.get('/', async (req, res, next) => {
         })
         torrents = orderTmp
     }
-    for (let i = 0; i < torrents.length; i++) console.log(torrents[i].name)
-    res.render('torrent', { torrents: torrents });
+    
+    req.metadata = { torrents }
+    res.render('torrent', { torrents });
 });
 
 module.exports = router;

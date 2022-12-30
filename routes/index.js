@@ -4,6 +4,9 @@ var router = express.Router();
 var session = require('express-session');
 const { checkUser } = require('../modules/user')
 
+const winston = require('winston');
+const logger = winston.loggers.get('logger')
+
 router.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -18,6 +21,7 @@ router.get('/', function (req, res, next) {
 
 router.post('/login', function (req, res, next) {
   if (!checkUser(req.body)) return res.redirect('/');
+  logger.info(`${req.body.username} logged in`, {context: "[AP]: "})
   req.session.user = req.body.username;
   res.redirect('/users')
 });

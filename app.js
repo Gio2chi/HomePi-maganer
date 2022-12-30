@@ -15,6 +15,22 @@ var apiRouter = require('./routes/api');
 
 var app = express();
 
+// Set morgan listener form metadata passed through the request
+morgan.token('metadata', (req, res) => {
+  if(!req.metadata) return ''
+  
+  let string = JSON.stringify(req.metadata)
+
+  if(
+    string.includes("'") || 
+    string.includes('\'') 
+    ) throw new Error('metadata should be an object without escaped \' or " ')
+
+  while (string.includes('"')) string = string.replace('"', "'")
+  return string
+})
+
+// Requested data to morgan in Json format
 const morganParams = {
   'http-version': 'HTTP/:http-version',
   method: ':method',
@@ -27,9 +43,13 @@ const morganParams = {
     address: ':remote-addr',
     user: ':remote-user',
     agent: ':user-agent'
-  }
+  },
+  metadata: ':metadata',
 }
+
+// Implement logger
 const logger = winston.loggers.get('logger')
+// stream interface to let morgan log with winston
 const logStream = {
   // Use the http severity
   write: (dataString) => {
@@ -45,12 +65,21 @@ const logStream = {
       return status;
     }
 
-    let message = `${JSON.parse(dataString).method} ${JSON.parse(dataString).url} ${colorStatus(JSON.parse(dataString).status)} ${JSON.parse(dataString)['response-time']} ms - ${JSON.parse(dataString)['content-length']}`
+    // Format log message
+    let metadata = JSON.parse(dataString)
+    let message = `${metadata.method} ${metadata.url} ${colorStatus(metadata.status)} ${metadata['response-time']} ms - ${metadata['content-length']}`
 
-    logger.http({message, metadata: JSON.parse(dataString)})
+    // Check for metadata
+    if(metadata.metadata != '-') {
+      while (metadata.metadata.includes("'")) metadata.metadata = metadata.metadata.replace("'", '"')
+      
+      metadata.metadata = JSON.parse(metadata.metadata)
+    } else metadata.metadata = undefined
+
+    logger.http(message, metadata)
   },
 };
-// GET / 304 192.793 ms - -
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -58,9 +87,6 @@ app.set('view engine', 'pug');
 app.use(helmet());
 app.use(cors());
 app.use(morgan(JSON.stringify(morganParams), {stream: logStream}));
-// app.use(morgan(format))
-// app.use(morgan("combined", {stream: winston.stream}));
-// app.use(morgan('dev'))
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(cookieParser());

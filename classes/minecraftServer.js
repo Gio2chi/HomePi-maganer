@@ -109,6 +109,9 @@ class Server {
     // return server status
     running() { return this.#running; }
 
+    // return server port
+    port() { return this.#port; }
+
     // Stop the server
     stop() {
         // Check if the server is not running
