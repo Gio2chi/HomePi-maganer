@@ -2,12 +2,15 @@ require('dotenv').config()
 const TransmissionApi = require('transmission');
 const fs = require('fs');
 const path = require('path');
+const TorrentSearchApi = require('torrent-search-api');
+
+const winston = require('winston');
+const logger = winston.loggers.get('logger')
 
 //if the url of the provider does change, update it in the .dotev file and in the node_modules folder
 // the pirate bay does not provide the best results
 //TorrentSearchApi.enableProvider('ThePirateBay')
 
-const TorrentSearchApi = require('torrent-search-api');
 const MyCustomProvider = require('./providers/1337x');
 TorrentSearchApi.loadProvider(MyCustomProvider);
 TorrentSearchApi.enableProvider('custom1337x')
@@ -30,7 +33,7 @@ let download = (magnet, dir) => {
         // Download torrent in directory
         transmission.addUrl(magnet, { "download-dir": "/export/Gio_A_NAS/Plex" + dir }, (err, args) => {
             if(err) {
-                console.log(err)
+                logger.error(err)
                 return;
             }
             logger.info('Downloading ' + args.name, { context: '[TOR]: ', filePath: "/export/Gio_A_NAS/Plex" + dir })
@@ -41,7 +44,7 @@ let download = (magnet, dir) => {
         transmission.addUrl(magnet, (err, args) => {
             logger.info('Downloading ' + args.name, { context: '[TOR]: ', filePath: "/export/Gio_A_NAS/Plex" })
             if(err) {
-                console.log(err)
+                logger.error(err)
                 return;
             }
         })
@@ -55,7 +58,7 @@ let getAllTorrentDetails = async () => {
     return new Promise((resolve, reject) => {
         transmission.get((err, result) => {
             if (err) {
-                console.log(err);
+                logger.error(err);
                 reject(err);
             }
             torrents = result.torrents
@@ -68,7 +71,7 @@ let getTorrentDetails = (ids) => {
     return new Promise((resolve, reject) => {
         transmission.get(ids, (err, result) => {
             if (err) {
-                console.log(err);
+                logger.error(err);
                 reject(err);
             }
             if (result.torrents.length > 0) {
@@ -145,29 +148,29 @@ let getStatus = (code) => {
 let setTorrentStatus = async (status, id) => {
     switch(status) {
         case "START": {
-            transmission.start(id, function(err, result){if(err) console.log(err)});
+            transmission.start(id, function(err, result){if(err) logger.error(err)});
             break;
         }
         case "PAUSE": {
-            transmission.stop(id, function(err, result){if(err) console.log(err)});
+            transmission.stop(id, function(err, result){if(err) logger.error(err)});
             break;
         }
         case "REMOVE": {
-            transmission.remove(id, function(err, result){if(err) console.log(err)});
+            transmission.remove(id, function(err, result){if(err) logger.error(err)});
             break;
         }
         case "START_ALL": {
             let allTorrentDetails = await getAllTorrentDetails()
             for(let i = 0; i < allTorrentDetails.length; i++) {
-                if(allTorrentDetails[i].status == 0) transmission.start(allTorrentDetails[i].id, (err) => {if(err) console.log(err)})
+                if(allTorrentDetails[i].status == 0) transmission.start(allTorrentDetails[i].id, (err) => {if(err) logger.error(err)})
             }
             break;
         }
         case "PAUSE_ALL": {
             transmission.active((err, res) => {
-                if(err) console.log(err)
+                if(err) logger.error(err)
                 else for(let i=0; i != res.torrents.length; i++){
-                    transmission.stop(res.torrents[i].id, function(err, result){if(err) console.log(err)});
+                    transmission.stop(res.torrents[i].id, function(err, result){if(err) logger.error(err)});
                 }
             })
             break;
@@ -175,7 +178,7 @@ let setTorrentStatus = async (status, id) => {
         case "REMOVE_ALL": {
             let allTorrentDetails = await getAllTorrentDetails()
             for(let i = 0; i < allTorrentDetails.length; i++) {
-                if(allTorrentDetails[i].status == 0) transmission.remove(allTorrentDetails[i].id, (err) => {if(err) console.log(err)})
+                if(allTorrentDetails[i].status == 0) transmission.remove(allTorrentDetails[i].id, (err) => {if(err) logger.error(err)})
             }
             break;
         }
@@ -194,6 +197,7 @@ let startSessionTorrent = (s) => {
 // Stop session of retrieving information from transmission 
 let stopSessionTorrent = () => {
     runningTorrent = false
+    logger.verbose('Torrent session stopped', { context: '[TOR]: ' })
 }
 // Get session status of retrieving information from transmission 
 let isRunningTorrent = () => { return runningTorrent }
@@ -206,7 +210,7 @@ let asyncInterval = async (asyncFunction, ms) => {
         await asyncFunction()
         await delay(ms)
     }
-    console.log("exiting asyncInterval")
+    logger.verbose("exiting asyncInterval")
 }
 
 // Set session expiration in seconds
@@ -247,5 +251,4 @@ module.exports = {
     setTorrentStatus,
     getStatus,
     getMagnet,
-
 }

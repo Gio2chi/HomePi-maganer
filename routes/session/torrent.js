@@ -36,7 +36,6 @@ router.get('/', async (req, res, next) => {
     if (order.length > 0) {
         torrents.forEach(torrent => {
             let index = order.indexOf(torrent.id)
-            console.log(torrent.id, index)
             if (index != -1) { orderTmp[index] = torrent }
         })
         torrents.forEach(torrent => {

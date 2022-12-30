@@ -42,7 +42,7 @@ router.post('/start-server', async (req, res) => {
             servers[req.body.server] = new Server(req.body.server, port)
             logger.info(`Creating new Minecraft server instance`, {context: '[MC] ', port, serverName: req.body.server})
         }
-        catch (err) {console.log(err)}
+        catch (err) {logger.error(err)}
     } 
     // Check if the server is already running
     else if (servers[req.body.server].running()) {

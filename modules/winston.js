@@ -2,7 +2,6 @@ require('dotenv').config()
 const Transport = require('winston-transport');
 require('winston-daily-rotate-file');
 const winston = require('winston');
-// const { format } = winston;
 const path = require('path');
 const { Telegraf } = require('telegraf');
 const format = require('telegraf/format')
@@ -33,24 +32,24 @@ let telegramFilter = winston.format((info, levels) => {
     text.text += info.message
     info.message = text
 
-    if(typeof levels === 'string') return info.level == levels ? info : false
-    if(!(levels instanceof Array)) throw new Error('levels must be a string or an array')
-    if(levels.includes(info.level)) return info
-    
+    if (typeof levels === 'string') return info.level == levels ? info : false
+    if (!(levels instanceof Array)) throw new Error('levels must be a string or an array')
+    if (levels.includes(info.level)) return info
+
     return false
 })
 let simpleFormat = ({ level, message, label, timestamp }) => {
-    return `\x1b[90m${timestamp} ${label ? '\x1b[1m[' + label  + ']': '|' }\x1b[0m ${level}: ${message}`;
+    return `\x1b[90m${timestamp} ${label ? '\x1b[1m[' + label + ']' : '|'}\x1b[0m ${level}: ${message}`;
 }
 let logFormat = (info) => {
     let { level, message, timestamp, ...args } = info;
     let formatted = {
-            timestamp,
-            level,
-            // ...(context && { context }),
-            message,
-            metadata: {...args}
-        }
+        timestamp,
+        level,
+        // ...(context && { context }),
+        message,
+        metadata: { ...args }
+    }
     return JSON.stringify(formatted)
 }
 const colors = {
@@ -62,12 +61,14 @@ const colors = {
     debug: 'underline magenta'
 }
 
+let date = new Date().toLocaleDateString().replace('/', '-').replace('/', '-')
+
 let transports = {
     console: new winston.transports.Console({
         level: 'debug',
         format: winston.format.combine(
             winston.format.timestamp({ format: 'DD/MM/YYYY HH:mm:ss' }),
-            winston.format.colorize({colors}),
+            winston.format.colorize({ colors }),
             winston.format.printf(simpleFormat)
         )
     }),
@@ -83,7 +84,7 @@ let transports = {
     }),
     warnFile: new winston.transports.File({
         level: 'debug',
-        filename: path.join(__dirname, '../log/websites/admin_panel/warn.log'),
+        filename: path.join(__dirname, '../log/websites/admin_panel/warns.log'),
         format: winston.format.combine(
             levelFilter('warn'),
             winston.format.timestamp({ format: 'DD/MM/YYYY HH:mm:ss' }),
@@ -91,9 +92,14 @@ let transports = {
             winston.format.printf(logFormat)
         )
     }),
-    combinedFile: new winston.transports.File({
+    combinedFile: new winston.transports.DailyRotateFile({
+        filename: '%DATE%.log',
+        dirname: path.join(__dirname, '../log/websites/admin_panel/combined/'),
+        datePattern: 'YYYY-MM-DD-HH',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '14d',
         level: 'verbose',
-        filename: path.join(__dirname, '../log/websites/admin_panel/combined.log'),
         format: winston.format.combine(
             winston.format.timestamp({ format: 'DD/MM/YYYY HH:mm:ss' }),
             winston.format.json(),
@@ -118,3 +124,12 @@ winston.loggers.add('logger', {
         // new winston.transports.Http({ host: process.env.LOG_HOST, port: process.env.LOG_PORT, path: process.env.LOG_PATH})
     ]
 });
+
+
+const logger = winston.loggers.get('logger')
+
+logger.verbose('ciao1')
+
+setTimeout(() => {
+    logger.verbose('ciao2')
+}, 5000)

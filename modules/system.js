@@ -4,13 +4,24 @@ const path = require('path')
 
 //TODO: Add cache to store usage and temperature to create a time graph
 
+const winston = require('winston');
+const logger = winston.loggers.get('logger')
+
 let cpu = {}
 let mem = {}
 let network = {}
 let disk = {}
 
+// Because some of these tasks take some time to complete i prefer to set global variables to store the results and  
+// run them in a separate thread, logging the time each task requires to be completed
+// The responses can be retrieved with other functions
+
+// Get the usage of cpu, ram, disk and network and set it in global variables
 let updateSystemInformation = async () => {
-    console.time('\033[36mupdated system info\033[0m')
+    // Start profiling
+    const profiler = logger.startTimer();
+
+    // Start getting metrics
     cpu.temperature = (await si.cpuTemperature()).main
     let cpuLoad = await si.currentLoad()
     cpu.totalUsage = cpuLoad.currentLoad
@@ -39,46 +50,53 @@ let updateSystemInformation = async () => {
         disk.writeSpeed = diskLoad.wx_sec
     } catch (e) {}
     
-    console.log(cpu, mem, disk, network)
-
-    console.timeEnd('\033[36mupdated system info\033[0m')
+    profiler.done({ message: 'updated system info', level: 'debug', metadata: { cpu, ram, disk, network } });
     return
 }
 
+// Get the usage of cpu and ram for all allowed processes (in log/processesAllowed.json) 
+// and set it in global variables
 let usagePerProcess
 let updateUsagePerProcess = async () => {
-    console.time('\033[36mupdated usage per process\033[0m')
+    // Start profiling
+    const profiler = logger.startTimer();
 
+    // Parse allowed processes json file
     let json = JSON.parse(fs.readFileSync(path.join(__dirname, '../log/processesAllowed.json')))
+    // Handle json file without data
     if (json.lenth == 0) {
-        console.log("process allowed json empty")
-        console.timeEnd('\033[36mupdated usage per process\033[0m')
+        profiler.done({ message: 'updated usage per process', level: 'debug', metadata: { 'error-message': "process allowed json empty" }})
         return
     }
 
+    // Get names of allowed processes 
     let names = []
     json.forEach(process => {
         if (!names.includes(process.name)) names.push(process.name)
     });
 
+    // Get infos pre process
     let infos = await si.processLoad(names.join(', '))
     usagePerProcess = []
     infos.forEach(process => {
         usagePerProcess.push({ name: process.proc, cpuUsage: process.cpu, memUsage: process.mem })
     })
 
-    console.log(usagePerProcess)
-    console.timeEnd('\033[36mupdated usage per process\033[0m')
+    profiler.done({ message: 'updated usage per process', level: 'debug', metadata: usagePerProcess })
     return
 }
 
+// Update allowed processes json file
 let updateProcessList = async () => {
-    console.time('\033[36mupdated process list\033[0m')
+    // Start profiling
+    const profiler = logger.startTimer();
 
+    // All possible users and processes ever created
     let possibles = ['Plex', 'node', 'PM2', 'mariadbd', 'nginx', 'transmission-daemon']
     let users = ['daemon', 'pi', 'openmediavault-webgui', 'admin', 'openmediavault-notify', 'nas', 'plex', 'minecraft', 'mysql', 'debian-transmission']
     let services = await si.processes()
 
+    // update allowed processes json file
     let arr = []
     for (let i = 0; i != services.list.length; i++)
         if (users.includes(services.list[i].user) || possibles.includes(services.list[i].name)) {
@@ -93,12 +111,13 @@ let updateProcessList = async () => {
             arr.push(services.list[i])
         }
 
-    console.log("apps: " + arr.length)
     fs.writeFileSync(path.join(__dirname, '../log/processesAllowed.json'), JSON.stringify(arr, null, 2))
-    console.timeEnd('\033[36mupdated process list\033[0m')
+
+    profiler.done({ message: 'updated process list', level: 'debug' })
     return
 }
 
+// All boring session things
 let running
 let startSession = (s) => {
     if (running) return
@@ -111,6 +130,7 @@ let startSession = (s) => {
 }
 let stopSession = () => {
     running = false
+    logger.verbose('Stats session stopped', { context: '[Stats]: ' })
 }
 let isRunning = () => { return running }
 
@@ -121,7 +141,7 @@ let asyncInterval = async (asyncFunction, ms) => {
         await asyncFunction()
         await delay(ms)
     }
-    console.log("exiting asyncInterval")
+    logger.verbose("exiting asyncInterval")
 }
 
 let sessionExpired
@@ -145,9 +165,7 @@ let getExpiration = () => {
     return sessionExpired
 }
 
-let getInfos = () => {
-    return { cpu, mem, network, disk }
-}
+let getInfos = () => { return { cpu, mem, network, disk } }
 
 module.exports = {
     startSession,
