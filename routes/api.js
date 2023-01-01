@@ -19,6 +19,6 @@ router.use('/minecraft', minecraftRouter);
 router.use('/torrent', torrentRouter);
 router.use('/stats', statsRouter);
 // router.use('/webhooks', webhooksRouter); not implemented yet
-// router.use('/websites', websitesRouter); to reconfigure
+router.use('/websites', websitesRouter); // to reconfigure
 
 module.exports = router;

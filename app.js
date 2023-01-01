@@ -80,13 +80,19 @@ const logStream = {
   },
 };
 
+// Skip logging for the universal logging system, shared with multiple apps
+const logSkip = (req, res) => {
+  if(req.originalUrl.includes('/api/websites/log')) return true;
+  return false;
+}
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use(helmet());
 app.use(cors());
-app.use(morgan(JSON.stringify(morganParams), {stream: logStream}));
+app.use(morgan(JSON.stringify(morganParams), { stream: logStream, skip: logSkip }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(cookieParser());

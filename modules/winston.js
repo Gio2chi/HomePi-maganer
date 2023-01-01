@@ -61,8 +61,6 @@ const colors = {
     debug: 'underline magenta'
 }
 
-let date = new Date().toLocaleDateString().replace('/', '-').replace('/', '-')
-
 let transports = {
     console: new winston.transports.Console({
         level: 'debug',
@@ -124,3 +122,4 @@ winston.loggers.add('logger', {
         // new winston.transports.Http({ host: process.env.LOG_HOST, port: process.env.LOG_PORT, path: process.env.LOG_PATH})
     ]
 });
+

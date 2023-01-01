@@ -1,66 +1,63 @@
-const fs = require('fs');
-const Path = require('path');
-// const StreamCache = require('stream-cache');
 
-const logFolder = Path.join(__dirname, '../log/websites');
-let websitesArr = [];
+const winston = require('winston');
+const path = require('path');
 
-let logToFile = (websiteName, stream) => {
-    if (!fs.existsSync(Path.join(logFolder, websiteName))) fs.mkdirSync(Path.join(logFolder, websiteName))
-
-    setData(websiteName)
-    setInterval(() => { setData(websiteName) }, 25 * 60 * 60 * 1000)
-
-    //websitesArr[websiteName].stream = bus
-
-    stream.on('data', (buffer) => {
-        let file = websitesArr[websiteName].path
-        let lines = buffer.toString().split('\n')
-        fs.appendFileSync(Path.join(file), buffer.toString())
-        lines.forEach(line => {
-            if (websitesArr[websiteName].cache._buffers.length >= 1000) websitesArr[websiteName].cache._buffers.shift();
-            websitesArr[websiteName].cache._buffers.push(line + '\n')
-        }) 
-        if (websitesArr[websiteName].cache._buffers.length > 0)
-            websitesArr[websiteName].cache.pipe(fs.createWriteStream(Path.join(logFolder, websiteName, 'temp.log')))
-    })
+let levelFilter = winston.format((info, level) => {
+    return info.level == level ? info : false
+})
+let logFormat = (info) => {
+    let { level, message, timestamp, ...args } = info;
+    let formatted = {
+        timestamp,
+        level,
+        // ...(context && { context }),
+        message,
+        metadata: { ...args }
+    }
+    return JSON.stringify(formatted)
 }
 
-let setData = (websiteName) => {
-    let date = new Date().toISOString().substring(0, 10)
-    let filePath = Path.join(logFolder, websiteName, date + '.' +Math.floor(Math.random() * 1000).toString() + '.log')
-    fs.writeFileSync(filePath, '')
-    websitesArr[websiteName] = { path: filePath, name: websiteName, cache: new StreamCache() }
-}
-
-let getConsoleStream = (websiteName, stream) => {
-    let readable = fs.createReadStream(Path.join(logFolder, 'default.log'))
-    if (fs.existsSync(Path.join(logFolder, websiteName, 'temp.log')))
-        readable = fs.createReadStream(Path.join(logFolder, websiteName, 'temp.log'))
-    
-    readable.pipe(stream, { end: false })
-    process.nextTick(function () {
-        websitesArr[websiteName].stream.pipe(stream, { end: false })
-
-        websitesArr[websiteName].stream.once('end', function () {
-            stream.end()
+const createWebsite = (options) => {
+    const transports = [
+        new winston.transports.File({
+            level: 'debug',
+            filename: path.join(__dirname, '../log/websites/' + options.name + '/errors.log'),
+            format: winston.format.combine(
+                levelFilter('error'),
+                winston.format.timestamp({ format: 'DD/MM/YYYY HH:mm:ss' }),
+                winston.format.json(),
+                winston.format.printf(logFormat)
+            )
+        }),
+        new winston.transports.File({
+            level: 'debug',
+            filename: path.join(__dirname, '../log/websites/' + options.name + '/warns.log'),
+            format: winston.format.combine(
+                levelFilter('warn'),
+                winston.format.timestamp({ format: 'DD/MM/YYYY HH:mm:ss' }),
+                winston.format.json(),
+                winston.format.printf(logFormat)
+            )
+        }),
+        new winston.transports.DailyRotateFile({
+            filename: '%DATE%.log',
+            dirname: path.join(__dirname, '../log/websites/' + options.name + '/combined/'),
+            datePattern: 'YYYY-MM-DD-HH',
+            zippedArchive: true,
+            maxSize: '20m',
+            maxFiles: '14d',
+            level: 'verbose',
+            format: winston.format.combine(
+                winston.format.timestamp({ format: 'DD/MM/YYYY HH:mm:ss' }),
+                winston.format.json(),
+                winston.format.printf(logFormat)
+            )
         })
-    })
-}
+    ]
 
-let getWebsites = () => {
-    let websites = fs.readdirSync(logFolder, { withFileTypes: true })
-    return websites.filter(folder => folder.isDirectory()).map(folder => folder.name)
-}
-
-let websiteExists = (websiteName) => {
-    if (getWebsites().includes(websiteName)) return true;
-    return false;
+    return winston.createLogger({transports, ...options})
 }
 
 module.exports = {
-    getWebsites,
-    logToFile,
-    getConsoleStream,
-    websiteExists
+    createWebsite
 }

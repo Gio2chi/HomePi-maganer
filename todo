@@ -4,3 +4,5 @@ uncomment lines in mudules/system in fn updateSystemInformation //section disk
 
 torrent: configuration button 
 torrent search next page
+
+optional: token for each website in websits/log endpoint (json with website name linked to specific token)
