@@ -1,5 +1,5 @@
 {
-  "name": "control-logging-panel",
+  "name": "admin-panel",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -14,11 +14,11 @@
     "express-session": "^1.17.3",
     "helmet": "^5.1.1",
     "http-errors": "~1.6.3",
-    "jquery": "^3.6.2",
+    "jquery": "^3.6.3",
     "morgan": "~1.9.1",
     "otplib": "^12.0.1",
     "pug": "^3.0.2",
-    "systeminformation": "^5.16.6",
+    "systeminformation": "^5.17.9",
     "telegraf": "^4.11.2",
     "torrent-search-api": "^2.1.4",
     "transmission": "^0.4.10",
